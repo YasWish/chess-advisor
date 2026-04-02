@@ -1,250 +1,167 @@
+<div align="center">
+
 # ♚ Chess Advisor
 
-A browser-based chess analysis tool powered by **Stockfish** and the **Lichess Cloud Eval API**. Get engine-accurate best move recommendations, play against Stockfish at any strength, and understand positions with AI-powered explanations.
+### A free and open-source chess analysis tool
 
-**No server required** — everything runs in your browser.
+[**Live Demo**](https://yaswish.github.io/chess-advisor/) — [**Report Bug**](https://github.com/YasWish/chess-advisor/issues) — [**Request Feature**](https://github.com/YasWish/chess-advisor/issues)
 
-![Chess Advisor Screenshot](docs/screenshot.png)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![GitHub Pages](https://img.shields.io/badge/demo-live-brightgreen)](https://yaswish.github.io/chess-advisor/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+</div>
 
 ---
+
+## Overview
+
+Chess Advisor is a browser-based chess analysis tool that provides engine-accurate best move
+recommendations for any position. It combines the [Lichess Cloud Evaluation](https://lichess.org/api#tag/Analysis)
+database with a local [Stockfish](https://stockfishchess.org/) engine running via WebAssembly,
+alongside [Syzygy endgame tablebases](https://syzygy-tables.info/) for perfect endgame play.
+
+No server, no installation, no account required. Open the page and start analyzing.
 
 ## Features
 
-### 🔍 Engine Analysis
-- **Lichess Cloud Eval** (default) — instant analysis from Lichess's pre-computed database
-- **Local Stockfish WASM** (fallback) — runs Stockfish entirely in your browser via Web Worker
-- **Multi-PV** — view the top 1, 3, or 5 candidate moves ranked by evaluation
-- **Configurable depth** — set search depth from 8 to 40
-- **Visual arrows** — best move displayed as a green arrow on the board
-- **Eval bar** — real-time evaluation bar (like Chess.com/Lichess)
+**Engine Analysis** — Queries the Lichess cloud evaluation database for instant results,
+with automatic fallback to a local Stockfish WASM engine running in a Web Worker.
+Configurable search depth (8–30) and multi-PV (1, 3, or 5 candidate lines).
 
-### ♟ Interactive Board
-- **Click-to-move** with legal move highlighting (dots and rings)
-- **Drag & drop** pieces with floating ghost
-- **Check highlighting** — king square turns red when in check
-- **Last move highlighting** — see which squares were involved
-- **Board flip** — play from either side
-- **Pawn promotion** — visual piece picker dialog
+**Interactive Board** — Click-to-move and drag-and-drop with legal move highlighting,
+last move tracking, check indication, pawn promotion dialog, and board flipping.
+Full keyboard navigation with arrow keys for undo/redo.
 
-### 🎮 Play vs Engine
-- Adjustable Elo from **400 to 3200**
-- Choose White, Black, or Random
-- Engine responds automatically using local Stockfish WASM
-- Skill level maps to Stockfish's internal Skill Level parameter
+**Play vs Engine** — Play against Stockfish at adjustable strength from Elo 400 to 3200.
+Choose White, Black, or Random. The engine responds automatically using the local WASM worker.
 
-### 📖 Opening Book
-- Automatically detects and displays the opening name as you play
-- Covers 30+ common openings (Sicilian, Ruy López, Italian, Queen's Gambit, French, Caro-Kann, and more)
+**Endgame Tablebase** — Positions with 7 or fewer pieces are automatically looked up against
+the Syzygy tablebase via the Lichess API, showing the theoretical outcome (win/draw/loss)
+with distance-to-mate and the optimal move.
 
-### ⊞ Endgame Tablebase
-- For positions with **≤7 pieces**, queries the **Syzygy tablebase** via Lichess API
-- Shows theoretical outcome (Win/Draw/Loss) with distance-to-mate
-- Displays the tablebase-optimal move
+**Move Explanation** — A built-in analysis module explains the best move in plain English:
+what the piece does, what threats it creates, why the alternatives are weaker, and the
+expected continuation line.
 
-### 💡 AI Move Explanation
-- Uses the **Claude API** to explain why the best move is strongest
-- Plain-English strategic and tactical reasoning
-- Accessible via the "Explain" tab
+**Opening Detection** — Automatically identifies and displays the opening name for common
+positions including the Sicilian Defense, Ruy López, Italian Game, Queen's Gambit,
+French Defense, Caro-Kann, and 20+ others.
 
-### 📋 Import / Export
-- **FEN input** — load any position instantly
-- **PGN import** — paste a full game to replay and analyze
-- **PGN export** — save your game with headers, copy to clipboard
+**Blunder Detection** — Alerts when a move causes an evaluation swing of 1.5+ pawns.
+Each candidate move is classified as Brilliant, Best, Great, Good, Inaccuracy, Mistake,
+or Blunder based on centipawn loss.
 
-### 🎯 Blunder Detection
-- Alerts when evaluation swings by ≥1.5 pawns after a move
-- Move classification labels: Brilliant, Best, Great, Good, OK, Inaccuracy, Mistake, Blunder
-
-### ⌨ Keyboard Shortcuts
-| Key | Action |
-|-----|--------|
-| `←` | Undo move |
-| `→` | Redo move |
-| `Escape` | Close modals |
-
----
+**Import/Export** — Load any position via FEN string, import full games via PGN,
+and export annotated PGN to clipboard.
 
 ## Quick Start
 
-### Option 1: Just Open It (Easiest)
+Chess Advisor is a single HTML file with no build step and no dependencies to install.
 
-```bash
-# Clone the repo
-git clone https://github.com/YOUR_USERNAME/chess-advisor.git
+### Use Online
 
-# Open in browser
-open index.html
-# or
-xdg-open index.html    # Linux
-start index.html        # Windows
+Open **https://yaswish.github.io/chess-advisor/** in any modern browser.
+
+### Run Locally
+
+```
+git clone https://github.com/YasWish/chess-advisor.git
+cd chess-advisor
 ```
 
-That's it. No build step, no npm install, no server. Just open `index.html`.
+Then open `index.html` in your browser. For full Web Worker support (local Stockfish),
+serve it over HTTP:
 
-### Option 2: Serve Locally (Recommended for WASM)
-
-Some browsers restrict Web Workers when opened via `file://`. Use a local server:
-
-```bash
-# Python
+```
 python3 -m http.server 8000
-
-# Node.js
-npx serve .
-
-# Then open http://localhost:8000
+# Open http://localhost:8000
 ```
-
-### Option 3: Deploy to GitHub Pages
-
-1. Push this repo to GitHub
-2. Go to **Settings → Pages**
-3. Set source to **main branch**, root folder
-4. Your app will be live at `https://YOUR_USERNAME.github.io/chess-advisor/`
-
----
 
 ## How It Works
 
-### Architecture
-
 ```
-┌─────────────────────────────────────────┐
-│  Browser (Single HTML File)             │
-│                                         │
-│  ┌──────────┐  ┌─────────────────────┐  │
-│  │  Board UI │  │  Analysis Panel     │  │
-│  │  (Canvas) │  │  - Eval score       │  │
-│  │           │  │  - Best move        │  │
-│  │  chess.js │  │  - Top lines        │  │
-│  │  (logic)  │  │  - Move history     │  │
-│  └──────────┘  └─────────────────────┘  │
-│       │                │                 │
-│       ▼                ▼                 │
-│  ┌─────────────────────────────────┐    │
-│  │      Analysis Engine Layer      │    │
-│  │  1. Lichess Cloud API (fast)    │    │
-│  │  2. Stockfish WASM (fallback)   │    │
-│  │  3. Tablebase API (endgames)    │    │
-│  └─────────────────────────────────┘    │
-└─────────────────────────────────────────┘
-```
-
-### External Dependencies (loaded via CDN)
-
-| Library | Purpose | CDN |
-|---------|---------|-----|
-| `chess.js` v0.10.3 | Move validation, legal moves, PGN/FEN parsing | cdnjs |
-| `stockfish.js` v10.0.2 | Local engine analysis (Web Worker) | jsDelivr |
-
-### APIs Used
-
-| API | Purpose | Auth Required |
-|-----|---------|---------------|
-| [Lichess Cloud Eval](https://lichess.org/api#tag/Analysis) | Pre-computed position evaluations | No |
-| [Lichess Tablebase](https://tablebase.lichess.ovh) | Syzygy endgame tablebase lookups | No |
-| [Anthropic Claude API](https://docs.anthropic.com) | Move explanations in plain English | Yes (API key) |
-
-> **Note:** The Claude API integration works automatically within Claude.ai artifacts. For standalone deployment, you'll need to add your own API key handling.
-
----
-
-## Project Structure
-
-```
-chess-advisor/
-├── index.html          # The entire application (single file)
-├── README.md           # This file
-├── LICENSE             # MIT License
-├── .gitignore          # Git ignore rules
-└── docs/
-    └── screenshot.png  # App screenshot for README
+┌──────────────────────────────────────────────────────────┐
+│  Browser                                                 │
+│                                                          │
+│  ┌────────────────┐    ┌───────────────────────────────┐ │
+│  │   Chessboard   │    │      Analysis Panel           │ │
+│  │                │    │                               │ │
+│  │  click / drag  │    │  eval · best move · top lines │ │
+│  │  legal moves   │    │  move history · PV · classify │ │
+│  │  arrows        │    │  blunder alerts               │ │
+│  │                │    │                               │ │
+│  │   chess.js     │    │      Explain · Play Engine    │ │
+│  └────────────────┘    └───────────────────────────────┘ │
+│           │                         │                    │
+│           ▼                         ▼                    │
+│  ┌──────────────────────────────────────────────────┐    │
+│  │             Analysis Layer                        │    │
+│  │                                                   │    │
+│  │  1. Lichess Cloud Eval API  (fast, pre-computed) │    │
+│  │  2. Stockfish WASM Worker   (local fallback)     │    │
+│  │  3. Syzygy Tablebase API    (≤7 piece endgames)  │    │
+│  └──────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────┘
 ```
 
-### Why a Single HTML File?
+The analysis layer tries the Lichess cloud evaluation first. If the position is not in
+their database (uncommon positions, deep variations), it falls back to running Stockfish
+directly in the browser via WebAssembly in a dedicated Web Worker thread, keeping the
+UI responsive during computation.
 
-This project intentionally uses a **single-file architecture**:
+## Files
 
-- **Zero build step** — no webpack, vite, or npm needed
-- **Instant deployment** — drag and drop to any static host
-- **Easy to fork and modify** — everything in one place
-- **Works offline** — once loaded (except API calls)
-- **GitHub Pages ready** — push and deploy
+This distribution of Chess Advisor consists of the following files:
 
----
+  * **README.md**, the file you are currently reading.
+  * **index.html**, the complete application — board, engine integration, analysis UI,
+    and all styling in a single self-contained file.
+  * **LICENSE**, the MIT License under which this project is distributed.
+  * **CONTRIBUTING.md**, guidelines for contributing to the project.
 
-## Configuration
+## External Libraries
 
-### Engine Settings
+| Library | Version | Purpose |
+|---|---|---|
+| [chess.js](https://github.com/jhlywa/chess.js) | 0.10.3 | Move validation, legal move generation, FEN/PGN parsing |
+| [Stockfish.js](https://github.com/nicfab/stockfish.js) | 10.0.2 | Local engine analysis via WebAssembly (loaded on demand) |
 
-Settings are adjustable in the UI:
+Both libraries are loaded from public CDNs at runtime. No npm install required.
 
-| Setting | Default | Range | Description |
-|---------|---------|-------|-------------|
-| Depth | 20 | 8–40 | Search depth (higher = stronger but slower) |
-| Lines | 3 | 1/3/5 | Number of candidate moves to show |
+## APIs
 
-### Play vs Engine
+| Service | Purpose | Auth |
+|---|---|---|
+| [Lichess Cloud Eval](https://lichess.org/api#tag/Analysis) | Pre-computed position evaluations | None |
+| [Lichess Tablebase](https://tablebase.lichess.ovh) | Syzygy 7-piece endgame lookups | None |
 
-| Setting | Default | Range | Description |
-|---------|---------|-------|-------------|
-| Elo | 1500 | 400–3200 | Engine playing strength |
-| Color | White | W/B/Random | Side you play as |
+## Browser Support
 
----
-
-## Browser Compatibility
-
-| Browser | Status |
-|---------|--------|
-| Chrome 80+ | ✅ Full support |
-| Firefox 78+ | ✅ Full support |
-| Safari 14+ | ✅ Full support |
-| Edge 80+ | ✅ Full support |
-| Mobile Chrome | ✅ Works (responsive) |
-| Mobile Safari | ✅ Works (responsive) |
-
-> Web Workers and WASM are required for local Stockfish. All modern browsers support these.
-
----
+Chess Advisor runs in any modern browser with Web Worker and WebAssembly support.
+This includes Chrome 80+, Firefox 78+, Safari 14+, Edge 80+, and their mobile variants.
 
 ## Contributing
 
-Contributions are welcome! Some ideas for improvement:
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting
+a pull request. The project intentionally uses a single-file architecture with no build tools —
+please maintain this simplicity.
 
-- [ ] Piece images (SVG) instead of Unicode characters
-- [ ] Sound effects for moves, captures, checks
-- [ ] Game database integration (search by position)
-- [ ] Multi-game analysis (batch import)
-- [ ] Drill mode (replay blunders and find correct moves)
-- [ ] Dark/light theme toggle
-- [ ] Time controls for vs-engine games
-- [ ] Share analysis via URL (encode position in hash)
+Areas where help is especially appreciated:
 
-### Development
+  * SVG piece sets as an alternative to Unicode characters
+  * Sound effects for moves, captures, and checks
+  * Time controls for the Play vs Engine mode
+  * Position sharing via URL hash encoding
+  * Additional opening book coverage
 
-Since this is a single HTML file, development is straightforward:
+## Terms of Use
 
-1. Fork the repo
-2. Edit `index.html`
-3. Open in browser to test
-4. Submit a PR
+Chess Advisor is free and distributed under the **MIT License**. You are free to use, modify,
+and distribute it. See [LICENSE](LICENSE) for the full terms.
 
----
+## Acknowledgments
 
-## License
-
-MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-## Credits
-
-- [chess.js](https://github.com/jhlywa/chess.js) — Chess logic library by Jeff Hlywa
-- [Stockfish](https://stockfishchess.org/) — World's strongest open-source chess engine
-- [Lichess](https://lichess.org/) — Cloud eval API and tablebase API
-- [Anthropic Claude](https://www.anthropic.com/) — AI move explanations
-
----
-
-Built with ♟ by a chess enthusiast. No more back rank mates.
+  * [Stockfish](https://stockfishchess.org/) — the strongest open-source chess engine in the world
+  * [Lichess](https://lichess.org/) — for their generous free cloud evaluation and tablebase APIs
+  * [chess.js](https://github.com/jhlywa/chess.js) — chess logic library by Jeff Hlywa
