@@ -1,0 +1,1196 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg-deep: #0a0c10;
+    --bg-panel: #12151c;
+    --bg-card: #1a1e28;
+    --bg-hover: #222838;
+    --border: #2a3040;
+    --text-primary: #e8eaf0;
+    --text-secondary: #8890a4;
+    --text-muted: #5a6278;
+    --accent: #4ade80;
+    --accent-dim: #22543d;
+    --accent-glow: rgba(74, 222, 128, 0.15);
+    --danger: #f87171;
+    --warning: #fbbf24;
+    --info: #60a5fa;
+    --white-sq: #e8dcc8;
+    --black-sq: #7c944a;
+    --white-sq-hi: #f6f090;
+    --black-sq-hi: #b9cc3a;
+    --check-sq: rgba(255,0,0,0.55);
+    --move-dot: rgba(0,0,0,0.25);
+    --arrow-color: rgba(74, 222, 128, 0.7);
+    --arrow-threat: rgba(248,113,113,0.65);
+  }
+  
+  html, body { 
+    height: 100%; 
+    background: var(--bg-deep); 
+    color: var(--text-primary); 
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+  
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .app-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  
+  .app-title .crown { font-size: 22px; }
+  
+  .header-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  
+  .btn {
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  
+  .btn:hover { background: var(--bg-hover); border-color: var(--text-muted); }
+  .btn:active { transform: scale(0.97); }
+  .btn.active, .btn.primary { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .btn.danger { border-color: var(--danger); color: var(--danger); }
+  .btn.sm { padding: 4px 8px; font-size: 11px; }
+  .btn:disabled { opacity: 0.4; pointer-events: none; }
+  
+  .main-content { display: flex; flex: 1; overflow: hidden; }
+  
+  .board-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  
+  .board-wrapper { position: relative; display: flex; align-items: stretch; }
+  
+  .eval-bar {
+    width: 24px;
+    background: #333;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    margin-right: 3px;
+    flex-shrink: 0;
+  }
+  
+  .eval-bar-fill {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #fff;
+    transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  
+  .eval-bar-label {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    font-size: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    z-index: 2; writing-mode: vertical-rl; text-orientation: mixed; padding: 3px 0;
+  }
+  .eval-bar-label.top { top: 3px; color: #999; }
+  .eval-bar-label.bottom { bottom: 3px; color: #333; }
+  
+  .chessboard-container { position: relative; display: inline-block; }
+  
+  .chessboard {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    border: 2px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  
+  .square {
+    width: 64px; height: 64px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; cursor: pointer; position: relative;
+    user-select: none; transition: background 0.08s;
+  }
+  
+  .square.white { background: var(--white-sq); }
+  .square.black { background: var(--black-sq); }
+  .square.selected.white { background: var(--white-sq-hi); }
+  .square.selected.black { background: var(--black-sq-hi); }
+  .square.last-move.white { background: var(--white-sq-hi); }
+  .square.last-move.black { background: var(--black-sq-hi); }
+  .square.in-check { background: var(--check-sq) !important; }
+  
+  .square.can-move::after {
+    content: ''; width: 17px; height: 17px;
+    background: var(--move-dot); border-radius: 50%;
+    position: absolute; z-index: 2;
+  }
+  
+  .square.can-capture::after {
+    content: ''; width: 100%; height: 100%;
+    border: 5px solid var(--move-dot); border-radius: 50%;
+    position: absolute; z-index: 2;
+  }
+  
+  .square .piece { z-index: 1; text-shadow: 0 1px 3px rgba(0,0,0,0.3); line-height: 1; pointer-events: none; }
+  .square.dragging .piece { opacity: 0.4; }
+  
+  .drag-ghost {
+    position: fixed; pointer-events: none; z-index: 999;
+    font-size: 52px; text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    transform: translate(-50%, -50%); display: none;
+  }
+  
+  .square .coord {
+    position: absolute; font-size: 9px;
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; opacity: 0.55;
+  }
+  .square .coord.file { bottom: 1px; right: 3px; }
+  .square .coord.rank { top: 1px; left: 3px; }
+  .square.white .coord { color: var(--black-sq); }
+  .square.black .coord { color: var(--white-sq); }
+  
+  .board-arrows {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 10;
+  }
+  
+  .opening-name {
+    font-size: 12px; font-family: 'JetBrains Mono', monospace;
+    color: var(--info); text-align: center; min-height: 16px;
+    padding: 0 28px; max-width: 540px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .board-controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  
+  .player-info {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--text-secondary); width: 100%; padding: 0 28px;
+  }
+  
+  .turn-dot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; }
+  .turn-dot.white { background: #fff; }
+  .turn-dot.black { background: #222; }
+  .turn-dot.active { border-color: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  
+  .analysis-section {
+    flex: 1; display: flex; flex-direction: column;
+    border-left: 1px solid var(--border); background: var(--bg-panel);
+    min-width: 300px; overflow: hidden;
+  }
+  
+  .tab-bar { display: flex; border-bottom: 1px solid var(--border); background: var(--bg-card); }
+  
+  .tab-btn {
+    flex: 1; padding: 9px 10px; font-size: 11px;
+    font-family: 'JetBrains Mono', monospace; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text-muted); background: transparent;
+    border: none; border-bottom: 2px solid transparent;
+    cursor: pointer; transition: all 0.15s; text-align: center;
+  }
+  .tab-btn:hover { color: var(--text-secondary); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  
+  .tab-panel { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+  .tab-panel.active { display: flex; }
+  
+  .analysis-header {
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .analysis-header h3 {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+    color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  
+  .engine-status {
+    font-size: 10px; font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted); display: flex; align-items: center; gap: 5px;
+  }
+  .engine-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); }
+  .engine-status .dot.active { background: var(--accent); box-shadow: 0 0 5px var(--accent); }
+  .engine-status .dot.loading { background: var(--warning); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.3 } }
+  
+  .eval-display { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .eval-row { display: flex; align-items: baseline; gap: 12px; }
+  .eval-score { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; }
+  .eval-score.positive { color: var(--text-primary); }
+  .eval-score.negative { color: var(--text-secondary); }
+  .eval-score.mate { color: var(--danger); }
+  .eval-depth { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+  
+  .best-move-display {
+    margin-top: 8px; padding: 8px 12px;
+    background: var(--accent-glow); border: 1px solid var(--accent-dim);
+    border-radius: 6px; display: flex; align-items: center; gap: 10px;
+  }
+  .best-move-display .label { font-size: 10px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .best-move-display .move { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent); }
+  
+  .top-lines { flex: 1; overflow-y: auto; }
+  
+  .line-item {
+    display: flex; align-items: flex-start; padding: 8px 16px;
+    border-bottom: 1px solid rgba(42,48,64,0.4);
+    cursor: pointer; transition: background 0.1s; gap: 10px;
+  }
+  .line-item:hover { background: var(--bg-hover); }
+  .line-item.best { background: var(--accent-glow); }
+  
+  .line-rank { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: var(--text-muted); min-width: 18px; padding-top: 2px; }
+  .line-move { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: var(--text-primary); min-width: 46px; }
+  .line-eval { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; min-width: 44px; }
+  .line-eval.positive { color: var(--accent); }
+  .line-eval.negative { color: var(--danger); }
+  .line-eval.even { color: var(--text-secondary); }
+  .line-pv { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); line-height: 1.5; flex: 1; }
+  
+  .line-classification {
+    font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px;
+    text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0;
+  }
+  .cls-brilliant { background: rgba(96,211,255,0.15); color: #60d3ff; }
+  .cls-great, .cls-best { background: rgba(74,222,128,0.15); color: var(--accent); }
+  .cls-good { background: rgba(251,191,36,0.12); color: var(--warning); }
+  .cls-book { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+  .cls-inaccuracy { background: rgba(251,191,36,0.15); color: var(--warning); }
+  .cls-mistake { background: rgba(251,146,60,0.15); color: #fb923c; }
+  .cls-blunder { background: rgba(248,113,113,0.15); color: var(--danger); }
+  
+  .move-history-section { border-top: 1px solid var(--border); flex-shrink: 0; }
+  .move-history-header {
+    padding: 8px 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;
+    border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;
+  }
+  .move-history {
+    padding: 8px 16px; display: flex; flex-wrap: wrap; gap: 2px;
+    max-height: 110px; overflow-y: auto;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8;
+  }
+  .move-number { color: var(--text-muted); margin-right: 2px; }
+  .move-entry {
+    color: var(--text-primary); padding: 0 4px; border-radius: 3px;
+    cursor: pointer; margin-right: 3px; transition: background 0.1s;
+  }
+  .move-entry:hover { background: var(--bg-hover); }
+  .move-entry.current { background: var(--accent-dim); color: var(--accent); }
+  
+  .settings-row {
+    padding: 8px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    font-size: 11px; color: var(--text-secondary); border-top: 1px solid var(--border); flex-shrink: 0;
+  }
+  .setting-group { display: flex; align-items: center; gap: 5px; }
+  .setting-group label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .setting-group select, .setting-group input[type="number"] {
+    background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary);
+    padding: 3px 6px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; width: 65px;
+  }
+  
+  .engine-play-panel { padding: 16px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+  .engine-play-panel h4 {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-secondary); margin-bottom: 4px;
+  }
+  .elo-slider-row { display: flex; align-items: center; gap: 10px; }
+  .elo-slider-row input[type="range"] { flex: 1; accent-color: var(--accent); height: 6px; }
+  .elo-value {
+    font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700;
+    color: var(--accent); min-width: 60px; text-align: right;
+  }
+  .color-picker { display: flex; gap: 8px; }
+  .color-pick-btn {
+    flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 8px;
+    background: var(--bg-card); cursor: pointer; text-align: center;
+    font-size: 13px; font-weight: 600; transition: all 0.15s; color: var(--text-primary);
+  }
+  .color-pick-btn:hover { border-color: var(--text-muted); }
+  .color-pick-btn.selected { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+  .vs-engine-status {
+    padding: 10px 14px; background: var(--bg-card); border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary);
+    text-align: center; min-height: 42px; display: flex; align-items: center; justify-content: center;
+  }
+  
+  .explain-panel { padding: 16px; flex: 1; overflow-y: auto; }
+  .explain-content { font-size: 13px; line-height: 1.7; color: var(--text-secondary); }
+  .explain-content p { margin-bottom: 10px; }
+  .explain-content strong { color: var(--text-primary); }
+  
+  .tablebase-result { padding: 10px 16px; border-bottom: 1px solid var(--border); background: rgba(139,92,246,0.06); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  .tablebase-result .tb-label { color: #8b5cf6; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; margin-bottom: 3px; }
+  .tablebase-result .tb-outcome { font-size: 14px; font-weight: 700; }
+  .tb-win { color: var(--accent); }
+  .tb-draw { color: var(--text-secondary); }
+  .tb-loss { color: var(--danger); }
+  
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+    z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(3px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 20px; width: 480px; max-width: 92vw; }
+  .modal h2 { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 12px; color: var(--text-primary); }
+  .modal textarea, .modal input[type="text"] {
+    width: 100%; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary);
+    padding: 9px 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: vertical;
+  }
+  .modal textarea { min-height: 90px; }
+  .modal .btn-row { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+  .modal .hint { font-size: 10px; color: var(--text-muted); margin-top: 6px; }
+  
+  .game-over-banner {
+    display: none; padding: 8px 16px; background: rgba(248,113,113,0.1);
+    border: 1px solid var(--danger); margin: 6px 16px; border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+    color: var(--danger); text-align: center;
+  }
+  .game-over-banner.show { display: block; }
+  
+  .blunder-alert {
+    display: none; padding: 6px 16px; background: rgba(248,113,113,0.08);
+    border-left: 3px solid var(--danger); font-size: 11px; color: var(--danger);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .blunder-alert.show { display: block; }
+  
+  .analysis-placeholder { padding: 24px 16px; text-align: center; color: var(--text-muted); font-size: 12px; line-height: 1.6; }
+  .analysis-placeholder .icon { font-size: 24px; margin-bottom: 6px; }
+  
+  .promo-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+  .promo-overlay.open { display: flex; }
+  .promo-choices { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; gap: 6px; }
+  .promo-choices .sq {
+    width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;
+    font-size: 40px; cursor: pointer; border-radius: 6px;
+    background: var(--bg-card); border: 1px solid var(--border); transition: all 0.1s;
+  }
+  .promo-choices .sq:hover { background: var(--accent-dim); border-color: var(--accent); }
+  
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  
+  @media (max-width: 960px) {
+    .main-content { flex-direction: column; }
+    .analysis-section { border-left: none; border-top: 1px solid var(--border); min-width: unset; max-height: 50vh; }
+    .square { width: 46px; height: 46px; font-size: 30px; }
+    .board-section { padding: 8px; }
+  }
+  @media (max-width: 500px) {
+    .square { width: 40px; height: 40px; font-size: 27px; }
+    .btn { padding: 5px 8px; font-size: 11px; }
+  }
+</style>
+
+<div class="app-container">
+  <header class="app-header">
+    <div class="app-title"><span class="crown">♚</span> Chess Advisor</div>
+    <div class="header-actions">
+      <button class="btn" onclick="showModal('fen')">⬚ FEN</button>
+      <button class="btn" onclick="showModal('pgn')">📋 PGN</button>
+      <button class="btn" onclick="exportPgn()">⤓ Export</button>
+      <button class="btn" onclick="newGame()">✦ New</button>
+      <button class="btn" onclick="flipBoard()">⇅ Flip</button>
+      <button class="btn" id="btnAutoAnalysis" onclick="toggleAutoAnalysis()">⚡ Auto</button>
+    </div>
+  </header>
+  
+  <div class="main-content">
+    <div class="board-section">
+      <div class="player-info" id="topPlayer">
+        <div class="turn-dot black" id="topDot"></div>
+        <span id="topLabel">Black</span>
+      </div>
+      <div class="board-wrapper">
+        <div class="eval-bar">
+          <div class="eval-bar-fill" id="evalBarFill" style="height:50%"></div>
+          <div class="eval-bar-label top" id="evalBarTop"></div>
+          <div class="eval-bar-label bottom" id="evalBarBot">0.0</div>
+        </div>
+        <div class="chessboard-container">
+          <div class="chessboard" id="board"></div>
+          <svg class="board-arrows" id="arrowsSvg" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="ah" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="var(--arrow-color)"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+      </div>
+      <div class="opening-name" id="openingName"></div>
+      <div class="player-info" id="bottomPlayer">
+        <div class="turn-dot white active" id="bottomDot"></div>
+        <span id="bottomLabel">White</span>
+      </div>
+      <div class="board-controls">
+        <button class="btn sm" onclick="goToStart()">⏮</button>
+        <button class="btn sm" onclick="undoMove()">◀</button>
+        <button class="btn sm" onclick="redoMove()">▶</button>
+        <button class="btn sm" onclick="goToEnd()">⏭</button>
+        <button class="btn primary" onclick="analyzePosition()">🔍 Analyze</button>
+        <button class="btn" onclick="playBestMove()">⚡ Best</button>
+      </div>
+    </div>
+    
+    <div class="analysis-section">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('analysis')">Analysis</button>
+        <button class="tab-btn" onclick="switchTab('vsengine')">Play Engine</button>
+        <button class="tab-btn" onclick="switchTab('explain')">Explain</button>
+      </div>
+      
+      <div class="tab-panel active" id="tab-analysis">
+        <div class="analysis-header">
+          <h3>Engine</h3>
+          <div class="engine-status">
+            <div class="dot" id="engineDot"></div>
+            <span id="engineLabel">Ready</span>
+          </div>
+        </div>
+        <div class="eval-display" id="evalDisplay" style="display:none">
+          <div class="eval-row">
+            <div class="eval-score positive" id="evalScore">0.0</div>
+            <div class="eval-depth" id="evalDepth"></div>
+          </div>
+          <div class="best-move-display" id="bestMoveBox" style="display:none">
+            <span class="label">Best</span>
+            <span class="move" id="bestMoveText">—</span>
+          </div>
+        </div>
+        <div class="blunder-alert" id="blunderAlert"></div>
+        <div class="game-over-banner" id="gameOverBanner"></div>
+        <div id="tablebaseResult"></div>
+        <div class="top-lines" id="topLines">
+          <div class="analysis-placeholder" id="analysisPlaceholder">
+            <div class="icon">♟</div>
+            Click <b>Analyze</b> or enable <b>Auto</b><br>to get engine recommendations
+          </div>
+        </div>
+        <div class="move-history-section">
+          <div class="move-history-header">
+            <span>Moves</span>
+            <span id="moveCount" style="font-size:10px"></span>
+          </div>
+          <div class="move-history" id="moveHistory">
+            <span style="color:var(--text-muted);font-size:11px">No moves yet</span>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="setting-group">
+            <label>Depth</label>
+            <input type="number" id="depthSetting" value="20" min="8" max="40" style="width:50px">
+          </div>
+          <div class="setting-group">
+            <label>Lines</label>
+            <select id="multiPvSetting">
+              <option value="1">1</option>
+              <option value="3" selected>3</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div class="tab-panel" id="tab-vsengine">
+        <div class="engine-play-panel">
+          <div>
+            <h4>Engine Strength</h4>
+            <div class="elo-slider-row">
+              <input type="range" id="engineElo" min="400" max="3200" value="1500" step="100" oninput="document.getElementById('eloValue').textContent=this.value">
+              <div class="elo-value" id="eloValue">1500</div>
+            </div>
+          </div>
+          <div>
+            <h4>Play As</h4>
+            <div class="color-picker">
+              <div class="color-pick-btn selected" onclick="selectColor('w')" id="pickWhite">♔ White</div>
+              <div class="color-pick-btn" onclick="selectColor('b')" id="pickBlack">♚ Black</div>
+              <div class="color-pick-btn" onclick="selectColor('r')" id="pickRandom">⚄ Random</div>
+            </div>
+          </div>
+          <button class="btn primary" style="padding:12px;justify-content:center;font-size:14px" onclick="startVsEngine()">⚔ Start Game</button>
+          <div class="vs-engine-status" id="vsEngineStatus">Set up your game and press Start</div>
+        </div>
+      </div>
+      
+      <div class="tab-panel" id="tab-explain">
+        <div class="explain-panel">
+          <div class="explain-content" id="explainContent">
+            <div class="analysis-placeholder">
+              <div class="icon">💡</div>
+              After analysis, click the button below<br>to get a move explanation.
+            </div>
+          </div>
+          <button class="btn primary" style="margin-top:10px;justify-content:center" onclick="explainBestMove()" id="btnExplain">💡 Explain Best Move</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="drag-ghost" id="dragGhost"></div>
+
+<div class="modal-overlay" id="fenModal">
+  <div class="modal">
+    <h2>Load FEN Position</h2>
+    <input type="text" id="fenInput" placeholder="Paste FEN string here...">
+    <p class="hint">Example: rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1</p>
+    <div class="btn-row">
+      <button class="btn" onclick="closeModals()">Cancel</button>
+      <button class="btn primary" onclick="loadFen()">Load</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="pgnModal">
+  <div class="modal">
+    <h2>Import PGN</h2>
+    <textarea id="pgnInput" placeholder="Paste PGN here..."></textarea>
+    <div class="btn-row">
+      <button class="btn" onclick="closeModals()">Cancel</button>
+      <button class="btn primary" onclick="loadPgn()">Import</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <h2>Export PGN</h2>
+    <textarea id="pgnOutput" readonly style="min-height:140px"></textarea>
+    <div class="btn-row">
+      <button class="btn" onclick="closeModals()">Close</button>
+      <button class="btn primary" onclick="copyPgn()">📋 Copy</button>
+    </div>
+  </div>
+</div>
+
+<div class="promo-overlay" id="promoModal">
+  <div class="promo-choices" id="promoChoices"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script>
+let game = new Chess();
+let boardFlipped = false;
+let selectedSquare = null;
+let legalMovesForSelected = [];
+let autoAnalysis = false;
+let currentAnalysis = null;
+let lastEvalBeforeMove = null;
+let moveStack = [];
+let engineWorker = null;
+let localEngineReady = false;
+let vsEngineActive = false;
+let playerColor = 'w';
+let dragging = false;
+let dragFrom = null;
+
+const SQ = 64;
+const P = { wK:'♔',wQ:'♕',wR:'♖',wB:'♗',wN:'♘',wP:'♙',bK:'♚',bQ:'♛',bR:'♜',bB:'♝',bN:'♞',bP:'♟' };
+const FILES = 'abcdefgh'.split('');
+const RANKS = '87654321'.split('');
+
+const OPENINGS = {
+  'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR':"King's Pawn Opening",
+  'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR':"Queen's Pawn Game",
+  'rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR':'English Opening',
+  'rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R':'Réti Opening',
+  'rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR':'French Defense',
+  'rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR':'Caro-Kann Defense',
+  'rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR':'Sicilian Defense',
+  'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR':"King's Pawn Game",
+  'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R':'Open Game',
+  'r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R':'Italian Game',
+  'r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R':'Ruy López',
+  'r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R':'Ruy López: Morphy Defense',
+  'rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR':"Queen's Gambit",
+  'rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/8/PP2PPPP/RNBQKBNR':"Queen's Gambit Declined",
+  'rnbqkb1r/pppppp1p/5np1/8/3P4/8/PPP1PPPP/RNBQKBNR':"King's Indian Defense",
+  'rnbqkb1r/pppp1ppp/4pn2/8/2PP4/8/PP2PPPP/RNBQKBNR':'Nimzo/Queen\'s Indian',
+  'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R':'Sicilian: Open',
+  'rnbqkbnr/pppppp1p/6p1/8/4P3/8/PPPP1PPP/RNBQKBNR':'Modern Defense',
+  'rnbqkb1r/pppppppp/5n2/8/4P3/8/PPPP1PPP/RNBQKBNR':"Alekhine's Defense",
+};
+
+function detectOpening() {
+  const fen = game.fen().split(' ')[0];
+  for (const [k, v] of Object.entries(OPENINGS)) if (fen === k) return v;
+  return null;
+}
+
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['analysis','vsengine','explain'][i] === id);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+}
+
+function renderBoard() {
+  const boardEl = document.getElementById('board');
+  boardEl.innerHTML = '';
+  const rOrd = boardFlipped ? [...RANKS].reverse() : RANKS;
+  const fOrd = boardFlipped ? [...FILES].reverse() : FILES;
+  
+  let checkSq = null;
+  if (game.in_check()) {
+    const t = game.turn();
+    for (const f of FILES) for (const r of '12345678') {
+      const p = game.get(f+r);
+      if (p && p.type==='k' && p.color===t) checkSq = f+r;
+    }
+  }
+  
+  for (let r=0;r<8;r++) for (let f=0;f<8;f++) {
+    const sq = fOrd[f]+rOrd[r];
+    const isL = (r+f)%2===0;
+    const d = document.createElement('div');
+    d.className = 'square '+(isL?'white':'black');
+    d.dataset.square = sq;
+    if (selectedSquare===sq) d.classList.add('selected');
+    if (checkSq===sq) d.classList.add('in-check');
+    
+    const hist = game.history({verbose:true});
+    if (hist.length > 0) {
+      const last = hist[hist.length-1];
+      if (sq===last.from||sq===last.to) d.classList.add('last-move');
+    }
+    if (legalMovesForSelected.includes(sq)) {
+      d.classList.add(game.get(sq)?'can-capture':'can-move');
+    }
+    
+    const piece = game.get(sq);
+    if (piece) {
+      const s = document.createElement('span');
+      s.className = 'piece';
+      s.textContent = P[piece.color+piece.type.toUpperCase()];
+      d.appendChild(s);
+    }
+    if (f===0) { const c=document.createElement('span');c.className='coord rank';c.textContent=rOrd[r];d.appendChild(c); }
+    if (r===7) { const c=document.createElement('span');c.className='coord file';c.textContent=fOrd[f];d.appendChild(c); }
+    
+    d.addEventListener('mousedown', e => onMD(e,sq));
+    d.addEventListener('click', () => { if(!dragging) onClick(sq); });
+    boardEl.appendChild(d);
+  }
+  
+  const svg = document.getElementById('arrowsSvg');
+  svg.setAttribute('viewBox', `0 0 ${8*SQ} ${8*SQ}`);
+  updateTurn();
+  document.getElementById('openingName').textContent = detectOpening() || '';
+  checkGO();
+}
+
+function updateTurn() {
+  const t = game.turn();
+  const td = document.getElementById('topDot'), bd = document.getElementById('bottomDot');
+  if (boardFlipped) {
+    td.className='turn-dot white'+(t==='w'?' active':'');
+    bd.className='turn-dot black'+(t==='b'?' active':'');
+    document.getElementById('topLabel').textContent='White';
+    document.getElementById('bottomLabel').textContent='Black';
+  } else {
+    td.className='turn-dot black'+(t==='b'?' active':'');
+    bd.className='turn-dot white'+(t==='w'?' active':'');
+    document.getElementById('topLabel').textContent='Black';
+    document.getElementById('bottomLabel').textContent='White';
+  }
+}
+
+// Drag
+function onMD(e, sq) {
+  const piece = game.get(sq);
+  if (!piece || piece.color!==game.turn()) return;
+  if (vsEngineActive && piece.color!==playerColor) return;
+  dragging=true; dragFrom=sq;
+  selectSq(sq);
+  const g = document.getElementById('dragGhost');
+  g.textContent = P[piece.color+piece.type.toUpperCase()];
+  g.style.display='block'; g.style.left=e.clientX+'px'; g.style.top=e.clientY+'px';
+  const el = document.querySelector(`.square[data-square="${sq}"]`);
+  if(el) el.classList.add('dragging');
+  e.preventDefault();
+}
+
+document.addEventListener('mousemove', e => {
+  if(!dragging) return;
+  const g=document.getElementById('dragGhost');
+  g.style.left=e.clientX+'px'; g.style.top=e.clientY+'px';
+});
+
+document.addEventListener('mouseup', e => {
+  if(!dragging) return;
+  document.getElementById('dragGhost').style.display='none';
+  const bEl = document.getElementById('board');
+  const rect = bEl.getBoundingClientRect();
+  const x=e.clientX-rect.left, y=e.clientY-rect.top;
+  const col=Math.floor(x/(rect.width/8)), row=Math.floor(y/(rect.height/8));
+  if(col>=0&&col<8&&row>=0&&row<8) {
+    const fO=boardFlipped?[...FILES].reverse():FILES;
+    const rO=boardFlipped?[...RANKS].reverse():RANKS;
+    const tSq=fO[col]+rO[row];
+    if(dragFrom&&legalMovesForSelected.includes(tSq)) tryMv(dragFrom,tSq);
+    else deselect();
+  } else deselect();
+  dragging=false; dragFrom=null;
+});
+
+function onClick(sq) {
+  if(game.game_over()) return;
+  if(vsEngineActive&&game.turn()!==playerColor) return;
+  if(selectedSquare) {
+    if(legalMovesForSelected.includes(sq)) tryMv(selectedSquare,sq);
+    else { const p=game.get(sq); if(p&&p.color===game.turn()) selectSq(sq); else deselect(); }
+  } else {
+    const p=game.get(sq); if(p&&p.color===game.turn()) selectSq(sq);
+  }
+}
+
+function selectSq(sq) {
+  selectedSquare=sq;
+  legalMovesForSelected=game.moves({square:sq,verbose:true}).map(m=>m.to);
+  renderBoard();
+}
+function deselect() { selectedSquare=null; legalMovesForSelected=[]; renderBoard(); }
+
+function tryMv(from,to) {
+  const p=game.get(from);
+  if(p&&p.type==='p'&&(to[1]==='8'||to[1]==='1')) { showPromo(from,to); return; }
+  makeMv(from,to);
+}
+
+function makeMv(from,to,promo) {
+  if(currentAnalysis&&currentAnalysis.eval!==null) lastEvalBeforeMove=currentAnalysis.eval;
+  const mv=game.move({from,to,promotion:promo||undefined});
+  if(!mv) return;
+  moveStack=[];
+  selectedSquare=null; legalMovesForSelected=[];
+  clearArrows(); currentAnalysis=null;
+  renderBoard(); renderHist();
+  if(autoAnalysis&&!game.game_over()) analyzePosition();
+  if(vsEngineActive&&!game.game_over()&&game.turn()!==playerColor) setTimeout(()=>engineMove(),300);
+}
+
+function showPromo(from,to) {
+  const c=game.turn();
+  const el=document.getElementById('promoModal');
+  const ch=document.getElementById('promoChoices');
+  ch.innerHTML='';
+  ['q','r','b','n'].forEach(p => {
+    const s=document.createElement('div'); s.className='sq';
+    s.textContent=P[c+p.toUpperCase()];
+    s.onclick=()=>{el.classList.remove('open');makeMv(from,to,p);};
+    ch.appendChild(s);
+  });
+  el.classList.add('open');
+}
+
+function renderHist() {
+  const el=document.getElementById('moveHistory');
+  const h=game.history();
+  document.getElementById('moveCount').textContent=h.length?Math.ceil(h.length/2)+' moves':'';
+  if(!h.length){el.innerHTML='<span style="color:var(--text-muted);font-size:11px">No moves yet</span>';return;}
+  let html='';
+  for(let i=0;i<h.length;i++){
+    if(i%2===0) html+=`<span class="move-number">${Math.floor(i/2)+1}.</span>`;
+    html+=`<span class="move-entry${i===h.length-1?' current':''}" onclick="goToMove(${i})">${h[i]}</span>`;
+  }
+  el.innerHTML=html; el.scrollTop=el.scrollHeight;
+}
+
+function goToMove(idx) {
+  const h=game.history(); game=new Chess();
+  for(let i=0;i<=idx;i++) game.move(h[i]);
+  moveStack=h.slice(idx+1); selectedSquare=null; legalMovesForSelected=[];
+  clearArrows(); renderBoard(); renderHist();
+  if(autoAnalysis) analyzePosition();
+}
+function goToStart(){const h=game.history();if(!h.length)return;moveStack=[...h];game=new Chess();selectedSquare=null;legalMovesForSelected=[];clearArrows();renderBoard();renderHist();}
+function goToEnd(){while(moveStack.length)game.move(moveStack.shift());selectedSquare=null;legalMovesForSelected=[];clearArrows();renderBoard();renderHist();if(autoAnalysis)analyzePosition();}
+function undoMove(){const m=game.undo();if(!m)return;moveStack.unshift(m.san);selectedSquare=null;legalMovesForSelected=[];clearArrows();renderBoard();renderHist();if(autoAnalysis)analyzePosition();}
+function redoMove(){if(!moveStack.length)return;game.move(moveStack.shift());selectedSquare=null;legalMovesForSelected=[];clearArrows();renderBoard();renderHist();if(autoAnalysis)analyzePosition();}
+function flipBoard(){boardFlipped=!boardFlipped;renderBoard();if(currentAnalysis&&currentAnalysis.bestUci)drawArrow(currentAnalysis.bestUci);}
+
+function newGame(){
+  game=new Chess();moveStack=[];selectedSquare=null;legalMovesForSelected=[];
+  currentAnalysis=null;lastEvalBeforeMove=null;vsEngineActive=false;
+  clearArrows();clearUI();renderBoard();renderHist();
+  document.getElementById('gameOverBanner').classList.remove('show');
+  document.getElementById('blunderAlert').classList.remove('show');
+  document.getElementById('tablebaseResult').innerHTML='';
+  document.getElementById('vsEngineStatus').textContent='Set up your game and press Start';
+}
+
+function toggleAutoAnalysis(){
+  autoAnalysis=!autoAnalysis;
+  document.getElementById('btnAutoAnalysis').classList.toggle('active',autoAnalysis);
+  if(autoAnalysis&&!game.game_over()) analyzePosition();
+}
+
+function showModal(t){closeModals();document.getElementById(t+'Modal').classList.add('open');}
+function closeModals(){document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open'));}
+
+function loadFen(){
+  const f=document.getElementById('fenInput').value.trim();
+  if(!f)return;if(!game.load(f)){alert('Invalid FEN');return;}
+  resetLoad();
+}
+function loadPgn(){
+  const p=document.getElementById('pgnInput').value.trim();
+  if(!p)return;if(!game.load_pgn(p)){alert('Invalid PGN');return;}
+  resetLoad();
+}
+function resetLoad(){
+  moveStack=[];selectedSquare=null;legalMovesForSelected=[];currentAnalysis=null;
+  clearArrows();clearUI();renderBoard();renderHist();closeModals();
+  if(autoAnalysis)analyzePosition();
+}
+
+function exportPgn(){
+  const pgn=game.pgn({max_width:80,newline_char:'\n'});
+  const hdr=`[Event "Chess Advisor"]\n[Date "${new Date().toISOString().split('T')[0].replace(/-/g,'.')}"]\n[Result "*"]\n\n`;
+  document.getElementById('pgnOutput').value=hdr+pgn;
+  showModal('export');
+}
+function copyPgn(){
+  const t=document.getElementById('pgnOutput');t.select();document.execCommand('copy');
+  const b=document.querySelector('#exportModal .btn.primary');b.textContent='✓ Copied';setTimeout(()=>b.textContent='📋 Copy',1500);
+}
+
+// ═══ ANALYSIS ═══
+async function analyzePosition(){
+  if(game.game_over()) return;
+  const fen=game.fen();
+  const mpv=parseInt(document.getElementById('multiPvSetting').value);
+  setStatus('loading','Analyzing…');
+  document.getElementById('evalDisplay').style.display='block';
+  document.getElementById('analysisPlaceholder')&&(document.getElementById('analysisPlaceholder').style.display='none');
+  checkTablebase(fen);
+  
+  try{
+    const r=await fetchLichess(fen,mpv);
+    if(r&&game.fen()===fen){currentAnalysis=r;showAnalysis(r);checkBlunder(r);}
+  }catch(e){
+    console.error(e);
+    try{
+      const r=await analyzeLocal(fen,mpv);
+      if(r&&game.fen()===fen){currentAnalysis=r;showAnalysis(r);checkBlunder(r);}
+    }catch(e2){
+      setStatus('','Error');
+      document.getElementById('topLines').innerHTML='<div class="analysis-placeholder"><div class="icon">⚠</div>Analysis unavailable</div>';
+    }
+  }
+}
+
+async function fetchLichess(fen,mpv){
+  const r=await fetch(`https://lichess.org/api/cloud-eval?fen=${encodeURIComponent(fen)}&multiPv=${mpv}`);
+  if(!r.ok)throw new Error('API '+r.status);
+  const d=await r.json();
+  const lines=(d.pvs||[]).map((pv,i)=>{
+    const uciMoves=pv.moves?pv.moves.split(' '):[];
+    const tmp=new Chess(fen);const san=[],uci=[];
+    for(const u of uciMoves){const m=tmp.move({from:u.substring(0,2),to:u.substring(2,4),promotion:u.length>4?u[4]:undefined});if(m){san.push(m.san);uci.push(u);}else break;}
+    return{rank:i+1,move:san[0]||'?',uci:uci[0]||'',evalCp:pv.cp??null,evalMate:pv.mate??null,pv:san.slice(0,10),pvUci:uci};
+  });
+  if(!lines.length)return null;
+  const b=lines[0];
+  return{lines,eval:b.evalCp!==null?b.evalCp/100:null,mate:b.evalMate,bestMove:b.move,bestUci:b.uci,depth:d.depth||'?',source:'Lichess Cloud',fen};
+}
+
+async function initLocal(){
+  if(engineWorker)return;
+  const r=await fetch('https://cdn.jsdelivr.net/npm/stockfish.js@10.0.2/stockfish.js');
+  const b=await r.blob();
+  engineWorker=new Worker(URL.createObjectURL(b));
+  return new Promise((res,rej)=>{
+    const t=setTimeout(()=>rej('timeout'),15000);
+    engineWorker.onmessage=e=>{if(typeof e.data==='string'&&e.data.includes('uciok')){clearTimeout(t);localEngineReady=true;res();}};
+    engineWorker.postMessage('uci');
+  });
+}
+
+async function analyzeLocal(fen,mpv){
+  if(!localEngineReady){setStatus('loading','Loading Stockfish…');await initLocal();}
+  const depth=parseInt(document.getElementById('depthSetting').value)||20;
+  return new Promise(res=>{
+    const lines=[];let cd=0;
+    const to=setTimeout(()=>res(buildRes(lines,fen,cd)),30000);
+    const h=e=>{
+      const m=typeof e.data==='string'?e.data:'';
+      if(m.startsWith('info depth')){const p=parseInfo(m,fen);if(p){cd=p.depth;lines[p.multipv-1]=p;if(cd>=10&&game.fen()===fen)showAnalysis(buildRes(lines,fen,cd));}}
+      if(m.startsWith('bestmove')){clearTimeout(to);engineWorker.removeEventListener('message',h);res(buildRes(lines,fen,cd));}
+    };
+    engineWorker.addEventListener('message',h);
+    engineWorker.postMessage('stop');engineWorker.postMessage('isready');
+    engineWorker.postMessage(`setoption name MultiPV value ${mpv}`);
+    engineWorker.postMessage(`position fen ${fen}`);
+    engineWorker.postMessage(`go depth ${depth}`);
+  });
+}
+
+function parseInfo(msg,fen){
+  const dM=msg.match(/depth (\d+)/),sM=msg.match(/score (cp|mate) (-?\d+)/),pM=msg.match(/ pv (.+)/),mM=msg.match(/multipv (\d+)/);
+  if(!dM||!sM)return null;
+  const uci=pM?pM[1].trim().split(' '):[];
+  const tmp=new Chess(fen);const san=[];
+  for(const u of uci){const m=tmp.move({from:u.substring(0,2),to:u.substring(2,4),promotion:u.length>4?u[4]:undefined});if(m)san.push(m.san);else break;}
+  return{depth:+dM[1],multipv:mM?+mM[1]:1,evalCp:sM[1]==='cp'?+sM[2]:null,evalMate:sM[1]==='mate'?+sM[2]:null,move:san[0]||'?',uci:uci[0]||'',pv:san.slice(0,10),pvUci:uci};
+}
+
+function buildRes(lines,fen,d){
+  const v=lines.filter(Boolean).map((l,i)=>({...l,rank:i+1}));
+  if(!v.length)return null;const b=v[0];
+  return{lines:v,eval:b.evalCp!==null?b.evalCp/100:null,mate:b.evalMate,bestMove:b.move,bestUci:b.uci,depth:d,source:'Local Stockfish',fen};
+}
+
+async function checkTablebase(fen){
+  const el=document.getElementById('tablebaseResult');
+  const pc=fen.split(' ')[0].replace(/[^a-zA-Z]/g,'').length;
+  if(pc>7){el.innerHTML='';return;}
+  try{
+    const r=await fetch(`https://tablebase.lichess.ovh/standard?fen=${encodeURIComponent(fen)}`);
+    if(!r.ok){el.innerHTML='';return;}
+    const d=await r.json();
+    let out,cls;
+    if(d.category==='win'||d.category==='maybe-win'){out=`Win in ${Math.abs(d.dtm||d.dtz||'?')}`;cls='tb-win';}
+    else if(d.category==='loss'||d.category==='maybe-loss'){out=`Loss in ${Math.abs(d.dtm||d.dtz||'?')}`;cls='tb-loss';}
+    else{out='Draw';cls='tb-draw';}
+    let tbMv='';
+    if(d.moves&&d.moves[0]){const u=d.moves[0].uci;const t=new Chess(fen);const m=t.move({from:u.substring(0,2),to:u.substring(2,4),promotion:u.length>4?u[4]:undefined});if(m)tbMv=` · Best: ${m.san}`;}
+    el.innerHTML=`<div class="tablebase-result"><div class="tb-label">⊞ Tablebase (${pc}pc)</div><div class="tb-outcome ${cls}">${out}${tbMv}</div></div>`;
+  }catch(e){el.innerHTML='';}
+}
+
+function showAnalysis(r){
+  if(!r)return;
+  setStatus('active',r.source+' · d'+r.depth);
+  document.getElementById('evalDisplay').style.display='block';
+  const sEl=document.getElementById('evalScore'),dEl=document.getElementById('evalDepth');
+  if(r.mate!==null&&r.mate!==undefined){sEl.textContent=(r.mate>0?'+':'')+'M'+Math.abs(r.mate);sEl.className='eval-score mate';}
+  else if(r.eval!==null){const e=r.eval;sEl.textContent=(e>=0?'+':'')+e.toFixed(2);sEl.className='eval-score '+(e>=0?'positive':'negative');}
+  dEl.textContent=`d${r.depth} · ${r.source}`;
+  const bb=document.getElementById('bestMoveBox');bb.style.display='flex';
+  document.getElementById('bestMoveText').textContent=r.bestMove;
+  if(r.bestUci)drawArrow(r.bestUci);
+  updateEvalBar(r);
+  renderLines(r);
+}
+
+function renderLines(r){
+  const c=document.getElementById('topLines');c.innerHTML='';
+  const turn=r.fen.split(' ')[1];
+  r.lines.forEach((l,i)=>{
+    const d=document.createElement('div');d.className='line-item'+(i===0?' best':'');
+    let eT,eC;
+    if(l.evalMate!==null&&l.evalMate!==undefined){eT=(l.evalMate>0?'+':'')+'M'+Math.abs(l.evalMate);eC=l.evalMate>0?'positive':'negative';}
+    else{const e=(l.evalCp||0)/100;eT=(e>=0?'+':'')+e.toFixed(2);eC=e>0.3?'positive':e<-0.3?'negative':'even';}
+    const cls=classify(l,i,r.lines);
+    let pv='',t=turn,mn=1;
+    for(let j=0;j<l.pv.length;j++){if(t==='w')pv+=mn+'.';else if(j===0)pv+=mn+'…';pv+=l.pv[j]+' ';if(t==='b')mn++;t=t==='w'?'b':'w';}
+    d.innerHTML=`<span class="line-rank">#${l.rank}</span><span class="line-move">${l.move}</span><span class="line-eval ${eC}">${eT}</span><span class="line-classification cls-${cls.k}">${cls.l}</span><span class="line-pv">${pv.trim()}</span>`;
+    d.onclick=()=>{if(l.uci)drawArrow(l.uci);};
+    c.appendChild(d);
+  });
+}
+
+function classify(l,i,all){
+  if(!all.length)return{l:'Good',k:'good'};
+  const bE=all[0].evalCp||0,tE=l.evalCp||0,d=Math.abs(bE-tE);
+  if(i===0){if(l.evalMate!==null&&l.evalMate>0)return{l:'!!',k:'brilliant'};return{l:'Best',k:'best'};}
+  if(d<15)return{l:'Great',k:'great'};if(d<50)return{l:'Good',k:'good'};
+  if(d<100)return{l:'OK',k:'book'};if(d<200)return{l:'Inacc.',k:'inaccuracy'};
+  if(d<400)return{l:'Mistake',k:'mistake'};return{l:'Blunder',k:'blunder'};
+}
+
+function updateEvalBar(r){
+  let p;
+  if(r.mate!==null&&r.mate!==undefined)p=r.mate>0?96:4;
+  else if(r.eval!==null){p=50+50*(2/(1+Math.exp(-0.4*r.eval))-1);p=Math.max(3,Math.min(97,p));}
+  else p=50;
+  document.getElementById('evalBarFill').style.height=p+'%';
+  const s=r.mate!==null?((r.mate>0?'+':'')+'M'+Math.abs(r.mate)):(r.eval!==null?((r.eval>=0?'+':'')+r.eval.toFixed(1)):'0.0');
+  document.getElementById('evalBarTop').textContent=(r.eval<0||(r.mate&&r.mate<0))?s:'';
+  document.getElementById('evalBarBot').textContent=(r.eval>=0||(r.mate&&r.mate>0)||r.mate===null)?s:'';
+}
+
+function clearArrows(){document.querySelectorAll('#arrowsSvg .al').forEach(e=>e.remove());}
+
+function drawArrow(uci){
+  clearArrows();if(!uci||uci.length<4)return;
+  const fc=sqC(uci.substring(0,2)),tc=sqC(uci.substring(2,4));
+  const svg=document.getElementById('arrowsSvg');
+  const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+  l.classList.add('al');
+  l.setAttribute('x1',fc.x);l.setAttribute('y1',fc.y);l.setAttribute('x2',tc.x);l.setAttribute('y2',tc.y);
+  l.setAttribute('stroke','var(--arrow-color)');l.setAttribute('stroke-width','11');
+  l.setAttribute('stroke-linecap','round');l.setAttribute('marker-end','url(#ah)');l.setAttribute('opacity','0.75');
+  svg.appendChild(l);
+}
+
+function sqC(sq){
+  const f=sq.charCodeAt(0)-97,r=parseInt(sq[1])-1;
+  let c=boardFlipped?7-f:f,row=boardFlipped?r:7-r;
+  return{x:c*SQ+SQ/2,y:row*SQ+SQ/2};
+}
+
+function checkBlunder(r){
+  const a=document.getElementById('blunderAlert');
+  if(lastEvalBeforeMove!==null&&r.eval!==null){
+    const d=Math.abs(r.eval-lastEvalBeforeMove);
+    if(d>=1.5){const h=game.history();a.textContent=`⚠ ${h.length?h[h.length-1]:'?'} — swing of ${d.toFixed(1)} pawns`;a.classList.add('show');return;}
+  }
+  a.classList.remove('show');
+}
+
+// ═══ PLAY VS ENGINE ═══
+function selectColor(c){
+  document.querySelectorAll('.color-pick-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById(c==='w'?'pickWhite':c==='b'?'pickBlack':'pickRandom').classList.add('selected');
+  playerColor=c==='r'?(Math.random()<0.5?'w':'b'):c;
+}
+
+async function startVsEngine(){
+  if(!localEngineReady){
+    document.getElementById('vsEngineStatus').textContent='Loading engine…';
+    try{await initLocal();}catch(e){document.getElementById('vsEngineStatus').textContent='Failed';return;}
+  }
+  newGame();vsEngineActive=true;
+  const elo=parseInt(document.getElementById('engineElo').value);
+  const skill=Math.max(0,Math.min(20,Math.round((elo-400)/140)));
+  engineWorker.postMessage(`setoption name Skill Level value ${skill}`);
+  if(playerColor==='b'){boardFlipped=true;renderBoard();engineMove();}
+  document.getElementById('vsEngineStatus').textContent=`${playerColor==='w'?'White':'Black'} vs Stockfish (~${elo})`;
+  switchTab('analysis');
+}
+
+function engineMove(){
+  if(!vsEngineActive||!engineWorker||game.game_over())return;
+  setStatus('loading','Thinking…');
+  const elo=parseInt(document.getElementById('engineElo').value);
+  const d=Math.max(4,Math.min(15,Math.round(elo/250)));
+  const h=e=>{
+    const m=typeof e.data==='string'?e.data:'';
+    if(m.startsWith('bestmove')){
+      engineWorker.removeEventListener('message',h);
+      const u=m.split(' ')[1];
+      if(u&&u!=='(none)'){
+        setTimeout(()=>{makeMv(u.substring(0,2),u.substring(2,4),u.length>4?u[4]:undefined);setStatus('active','Your turn');},200);
+      }
+    }
+  };
+  engineWorker.addEventListener('message',h);
+  engineWorker.postMessage('isready');
+  engineWorker.postMessage('setoption name MultiPV value 1');
+  engineWorker.postMessage(`position fen ${game.fen()}`);
+  engineWorker.postMessage(`go depth ${d}`);
+}
+
+// ═══ EXPLAIN ═══
+async function explainBestMove(){
+  if(!currentAnalysis){document.getElementById('explainContent').innerHTML='<p style="color:var(--text-muted)">Run analysis first.</p>';return;}
+  switchTab('explain');
+  const btn=document.getElementById('btnExplain');btn.disabled=true;btn.textContent='⏳ Thinking…';
+  document.getElementById('explainContent').innerHTML='<p style="color:var(--text-muted)">Generating…</p>';
+  const fen=game.fen(),bm=currentAnalysis.bestMove;
+  const ev=currentAnalysis.mate!==null?`Mate in ${Math.abs(currentAnalysis.mate)}`:currentAnalysis.eval!==null?`${currentAnalysis.eval>0?'+':''}${currentAnalysis.eval.toFixed(2)}`:'?';
+  const turn=game.turn()==='w'?'White':'Black';
+  const ls=currentAnalysis.lines.map(l=>{const e=l.evalMate!==null?`M${l.evalMate}`:`${((l.evalCp||0)/100).toFixed(2)}`;return`${l.move} (${e}): ${l.pv.join(' ')}`;}).join('\n');
+  const prompt=`Expert chess coach: explain why ${bm} is best.\nFEN: ${fen}\nTurn: ${turn}\nEval: ${ev}\nLines:\n${ls}\n\n3 concise paragraphs: 1) idea behind ${bm} 2) threats created 3) why alternatives weaker. No markdown headers.`;
+  try{
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const data=await resp.json();
+    const txt=data.content?.map(c=>c.text||'').join('')||'No explanation.';
+    document.getElementById('explainContent').innerHTML=txt.split('\n\n').filter(Boolean).map(p=>`<p>${p.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</p>`).join('');
+  }catch(e){
+    document.getElementById('explainContent').innerHTML=`<p style="color:var(--danger)">Could not generate explanation.</p><p style="color:var(--text-muted);font-size:11px">${e.message}</p>`;
+  }
+  btn.disabled=false;btn.textContent='💡 Explain Best Move';
+}
+
+// ═══ UTIL ═══
+function setStatus(s,l){
+  document.getElementById('engineDot').className='dot '+(s==='loading'?'loading':s==='active'?'active':'');
+  document.getElementById('engineLabel').textContent=l;
+}
+
+function clearUI(){
+  document.getElementById('evalDisplay').style.display='none';
+  document.getElementById('bestMoveBox').style.display='none';
+  document.getElementById('topLines').innerHTML='<div class="analysis-placeholder" id="analysisPlaceholder"><div class="icon">♟</div>Click <b>Analyze</b> or enable <b>Auto</b><br>to get engine recommendations</div>';
+  document.getElementById('evalBarFill').style.height='50%';
+  document.getElementById('evalBarTop').textContent='';
+  document.getElementById('evalBarBot').textContent='0.0';
+  setStatus('','Ready');
+  document.getElementById('blunderAlert').classList.remove('show');
+  document.getElementById('explainContent').innerHTML='<div class="analysis-placeholder"><div class="icon">💡</div>After analysis, click below.</div>';
+}
+
+function checkGO(){
+  const b=document.getElementById('gameOverBanner');
+  if(game.in_checkmate()){b.textContent=`Checkmate — ${game.turn()==='w'?'Black':'White'} wins`;b.classList.add('show');if(vsEngineActive)document.getElementById('vsEngineStatus').textContent=game.turn()===playerColor?'You lost!':'You won!';}
+  else if(game.in_stalemate()){b.textContent='Stalemate';b.classList.add('show');}
+  else if(game.in_draw()){b.textContent='Draw';b.classList.add('show');}
+  else b.classList.remove('show');
+}
+
+function playBestMove(){
+  if(!currentAnalysis||!currentAnalysis.bestUci){analyzePosition().then(()=>setTimeout(()=>{if(currentAnalysis&&currentAnalysis.bestUci)exBest();},500));return;}
+  exBest();
+}
+function exBest(){if(!currentAnalysis||!currentAnalysis.bestUci)return;const u=currentAnalysis.bestUci;makeMv(u.substring(0,2),u.substring(2,4),u.length>4?u[4]:undefined);}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeModals();
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  if(e.key==='ArrowLeft')undoMove();
+  if(e.key==='ArrowRight')redoMove();
+});
+document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)closeModals();});});
+
+renderBoard();renderHist();
+</script>
