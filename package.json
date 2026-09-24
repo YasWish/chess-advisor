@@ -1,0 +1,58 @@
+{
+  "name": "chess-advisor",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Free, open-source chess analysis in the browser: Stockfish 19, game review with accuracy, play vs engine, and explanations of the best move.",
+  "license": "GPL-3.0-or-later",
+  "author": "Yasmitha (YasWish)",
+  "homepage": "https://yaswish.github.io/chess-advisor/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YasWish/chess-advisor.git"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "node scripts/e2e.mjs",
+    "openings": "node scripts/build-openings.mjs",
+    "engine:update": "node scripts/update-engine.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/source-serif-4": "^5.3.0",
+    "@fontsource/barlow": "^5.3.0",
+    "@lichess-org/chessground": "^10.2.0",
+    "chessops": "^0.15.1",
+    "lucide-react": "^1.47.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "^10.11.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9",
+    "puppeteer-core": "^25.12.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.70.1",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
+  }
+}

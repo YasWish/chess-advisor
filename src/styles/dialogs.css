@@ -1,0 +1,264 @@
+.modal {
+  width: min(560px, calc(100vw - 24px));
+  max-height: calc(100dvh - 48px);
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 30px 80px rgb(0 0 0 / 0.5);
+}
+
+.modal-wide {
+  width: min(780px, calc(100vw - 24px));
+}
+
+.modal::backdrop {
+  background: rgb(8 6 4 / 0.6);
+  backdrop-filter: blur(2px);
+}
+
+.modal-body {
+  display: grid;
+  gap: 1rem;
+  padding: 0 1.2rem 1.3rem;
+}
+
+.modal-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 0 0.5rem;
+  background: var(--surface);
+}
+
+.modal-head h2 {
+  font-family: var(--font-book);
+  font-size: var(--step-2);
+  font-weight: 600;
+}
+
+.import-form {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-row.end {
+  justify-content: flex-end;
+}
+
+.form-row .input {
+  flex: 1;
+}
+
+.file-pick {
+  position: relative;
+  margin-right: auto;
+  color: var(--brass-strong);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.file-pick input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.file-pick:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.form-error {
+  color: var(--bad);
+}
+
+.game-list {
+  max-height: 46vh;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.game-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.1rem 0.8rem;
+  width: 100%;
+  padding: 0.55rem 0.8rem;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  text-align: left;
+}
+
+.game-row:hover {
+  background: var(--surface-2);
+}
+
+.game-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-weight: 600;
+}
+
+.game-players small {
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+.game-vs {
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+.game-result {
+  font-family: var(--font-book);
+  font-weight: 600;
+}
+
+.game-meta {
+  grid-column: 1 / -1;
+  color: var(--ink-3);
+  font-size: var(--step--1);
+}
+
+.share-block {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.share-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.share-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  font-size: var(--step--1);
+}
+
+.share-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.settings,
+.help {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.8rem;
+}
+
+.settings section,
+.help section {
+  display: grid;
+  align-content: start;
+  gap: 0.55rem;
+}
+
+.settings h3,
+.help h3 {
+  margin: 0.3rem 0 0;
+  color: var(--ink);
+  font-size: var(--step-0);
+}
+
+.help p {
+  color: var(--ink-2);
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.swatch {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--surface);
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+
+.swatch.on {
+  box-shadow: 0 0 0 2px var(--brass);
+}
+
+.piece-sets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+
+.piece-set {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  padding: 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  font-size: var(--step--1);
+}
+
+.piece-set.on {
+  border-color: var(--brass);
+  background: var(--brass-wash);
+}
+
+.shortcuts {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.shortcuts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.shortcuts dd {
+  margin: 0;
+  color: var(--ink-2);
+  text-align: right;
+}
+
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .settings,
+  .help {
+    grid-template-columns: 1fr;
+  }
+
+  .modal {
+    max-height: calc(100dvh - 16px);
+  }
+}

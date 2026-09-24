@@ -1,0 +1,266 @@
+/* ---- Top bar --------------------------------------------------------------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  height: var(--header-h);
+  padding: 0 1rem 0 1.1rem;
+  padding-left: max(1.1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.brand-name {
+  font-family: var(--font-book);
+  font-size: var(--step-2);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.logo-bg {
+  fill: var(--brass);
+}
+
+.logo-rook {
+  fill: var(--bg);
+}
+
+.modes {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.modes button {
+  position: relative;
+  white-space: nowrap;
+  height: var(--header-h);
+  padding: 0 0.85rem;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+.modes button:hover {
+  color: var(--ink);
+}
+
+.modes button.on {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.modes button.on::after {
+  content: '';
+  position: absolute;
+  left: 0.85rem;
+  right: 0.85rem;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--brass);
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+
+/* ---- Workspace --------------------------------------------------------------
+ * Desktop: the board is as large as the viewport allows next to a fixed-width desk.
+ * The desk never makes the page taller than the board column (contain: size).
+ */
+.app-main {
+  padding: 18px 20px 20px;
+  padding-left: max(20px, env(safe-area-inset-left));
+  padding-right: max(20px, env(safe-area-inset-right));
+}
+
+.workspace {
+  --board-raw: max(
+    280px,
+    min(calc(100dvh - var(--header-h) - 160px), calc(100vw - var(--desk-w) - 110px), 900px)
+  );
+  /* Chessground snaps the board to whole multiples of 8 device pixels; matching that in
+     CSS keeps the eval bar, strips and board edges aligned. */
+  --board-size: round(down, var(--board-raw), 8px);
+  display: grid;
+  grid-template-columns: auto var(--desk-w);
+  justify-content: center;
+  align-items: stretch;
+  gap: 28px;
+}
+
+.mode-play .workspace,
+.mode-setup .workspace {
+  --board-raw: max(
+    280px,
+    min(calc(100dvh - var(--header-h) - 130px), calc(100vw - var(--desk-w) - 90px), 900px)
+  );
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.board-row {
+  display: flex;
+  gap: 10px;
+}
+
+.desk {
+  contain: size;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.mode-analysis .desk {
+  overflow: hidden;
+}
+
+@media (max-width: 1000px) {
+  .workspace,
+  .mode-play .workspace,
+  .mode-setup .workspace {
+    --board-raw: min(calc(100vw - 72px), calc(100dvh - var(--header-h) - 140px), 720px);
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 16px;
+  }
+
+  .mode-play .workspace,
+  .mode-setup .workspace {
+    --board-raw: min(calc(100vw - 40px), 720px);
+  }
+
+  .desk,
+  .mode-analysis .desk {
+    contain: none;
+    overflow: visible;
+    width: 100%;
+    max-width: calc(var(--board-size) + 30px);
+  }
+
+  /* The page scrolls on small screens, so the move list needs its own definite height. */
+  .moves {
+    max-height: 42vh;
+  }
+
+  .tools {
+    min-height: 0;
+  }
+
+  .tab-body {
+    max-height: 60vh;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --header-h: 52px;
+  }
+
+  .app-main {
+    padding: 8px 8px 24px;
+  }
+
+  .workspace,
+  .mode-analysis .workspace {
+    --board-raw: calc(100vw - 16px - 22px);
+  }
+
+  .mode-play .workspace,
+  .mode-setup .workspace {
+    --board-raw: calc(100vw - 16px);
+  }
+
+  .eval-bar {
+    width: 14px;
+  }
+
+  .board-row {
+    gap: 8px;
+  }
+
+  .stage:has(.eval-bar) .player-strip,
+  .stage:has(.eval-bar) .controls {
+    margin-left: 22px;
+  }
+
+  .brand-name,
+  .hide-sm {
+    display: none;
+  }
+
+  .topbar {
+    gap: 0.5rem;
+    padding: 0 0.4rem 0 0.6rem;
+  }
+
+  .modes button {
+    padding: 0 0.5rem;
+    font-size: var(--step--1);
+  }
+
+  .modes {
+    gap: 0;
+  }
+
+  .control-group:first-child .btn-icon {
+    width: 40px;
+  }
+
+  .controls .btn:not(.btn-icon) {
+    padding: 0 0.7rem;
+  }
+
+  .controls {
+    justify-content: center;
+  }
+
+  .modes button.on::after {
+    left: 0.55rem;
+    right: 0.55rem;
+  }
+
+  .top-actions .btn-icon {
+    width: 34px;
+  }
+
+  .desk {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  .top-actions .btn:nth-child(3) {
+    display: none;
+  }
+}
+
+@supports not (width: round(down, 100px, 8px)) {
+  .workspace {
+    --board-size: var(--board-raw);
+  }
+}

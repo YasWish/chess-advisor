@@ -1,0 +1,468 @@
+/* ---- Pieces: images come from the chosen set via --piece-* variables ------------ */
+.cg-wrap piece.king.white,
+.pc.white.king {
+  background-image: var(--piece-wK);
+}
+
+.cg-wrap piece.king.black,
+.pc.black.king {
+  background-image: var(--piece-bK);
+}
+
+.cg-wrap piece.queen.white,
+.pc.white.queen {
+  background-image: var(--piece-wQ);
+}
+
+.cg-wrap piece.queen.black,
+.pc.black.queen {
+  background-image: var(--piece-bQ);
+}
+
+.cg-wrap piece.rook.white,
+.pc.white.rook {
+  background-image: var(--piece-wR);
+}
+
+.cg-wrap piece.rook.black,
+.pc.black.rook {
+  background-image: var(--piece-bR);
+}
+
+.cg-wrap piece.bishop.white,
+.pc.white.bishop {
+  background-image: var(--piece-wB);
+}
+
+.cg-wrap piece.bishop.black,
+.pc.black.bishop {
+  background-image: var(--piece-bB);
+}
+
+.cg-wrap piece.knight.white,
+.pc.white.knight {
+  background-image: var(--piece-wN);
+}
+
+.cg-wrap piece.knight.black,
+.pc.black.knight {
+  background-image: var(--piece-bN);
+}
+
+.cg-wrap piece.pawn.white,
+.pc.white.pawn {
+  background-image: var(--piece-wP);
+}
+
+.cg-wrap piece.pawn.black,
+.pc.black.pawn {
+  background-image: var(--piece-bP);
+}
+
+/* ---- Board ---------------------------------------------------------------- */
+.board-frame {
+  position: relative;
+  width: var(--board-size);
+  aspect-ratio: 1;
+  flex: none;
+  border-radius: 4px;
+  box-shadow: var(--board-shadow);
+}
+
+.cg-host {
+  width: 100%;
+  height: 100%;
+}
+
+cg-board {
+  border-radius: 4px;
+  /* Checkerboard from two theme colours: a8 is light, as it must be. */
+  background: repeating-conic-gradient(var(--sq-dark) 0 25%, var(--sq-light) 0 50%) 0 0 / 25% 25%;
+}
+
+cg-board square.last-move {
+  background-color: rgb(222 170 55 / 0.4);
+}
+
+cg-board square.selected {
+  background-color: rgb(222 170 55 / 0.6);
+}
+
+cg-board square.move-dest {
+  background: radial-gradient(rgb(28 20 12 / 0.34) 19%, transparent 20.5%);
+}
+
+cg-board square.oc.move-dest {
+  background: radial-gradient(transparent 0 78%, rgb(28 20 12 / 0.34) 79%);
+}
+
+cg-board square.move-dest:hover,
+cg-board square.move-dest.hover {
+  background: rgb(222 170 55 / 0.42);
+}
+
+cg-board square.premove-dest {
+  background: radial-gradient(rgb(40 70 140 / 0.5) 19%, transparent 20.5%);
+}
+
+cg-board square.oc.premove-dest {
+  background: radial-gradient(transparent 0 78%, rgb(40 70 140 / 0.45) 79%);
+}
+
+cg-board square.current-premove {
+  background-color: rgb(50 90 170 / 0.5);
+}
+
+cg-board square.check {
+  background: radial-gradient(
+    ellipse at center,
+    rgb(255 50 30) 0%,
+    rgb(225 25 10 / 0.9) 28%,
+    rgb(170 0 0 / 0) 88%
+  );
+}
+
+.cg-wrap coords {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: clamp(9px, calc(var(--board-size) * 0.021), 13px);
+  opacity: 1;
+}
+
+.cg-wrap coords.ranks {
+  left: auto;
+  right: 0;
+  top: 0;
+  width: 12.5%;
+  height: 100%;
+  flex-flow: column-reverse;
+  align-items: flex-end;
+}
+
+.cg-wrap coords.ranks.black {
+  flex-flow: column;
+}
+
+.cg-wrap coords.ranks coord {
+  flex: 1 1 0;
+  padding: 0.3em 0.35em 0 0;
+  line-height: 1;
+}
+
+.cg-wrap coords.files {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 12.5%;
+  flex-flow: row;
+  text-transform: none;
+}
+
+.cg-wrap coords.files.black {
+  flex-flow: row-reverse;
+}
+
+.cg-wrap coords.files coord {
+  flex: 1 1 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 0 0.3em 0.35em;
+  line-height: 1;
+}
+
+.cg-wrap coord.coord-light {
+  color: var(--sq-dark);
+}
+
+.cg-wrap coord.coord-dark {
+  color: var(--sq-light);
+}
+
+.cg-wrap .cg-shapes {
+  opacity: 0.9;
+}
+
+.board-frame.editor.brushing cg-board {
+  cursor: copy;
+}
+
+/* ---- Promotion picker ------------------------------------------------------ */
+.promotion {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgb(10 8 6 / 0.55);
+  border-radius: 4px;
+}
+
+.promotion-column {
+  position: absolute;
+  width: 12.5%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.5);
+}
+
+.promotion-column.top {
+  top: 0;
+}
+
+.promotion-column.bottom {
+  bottom: 0;
+  flex-direction: column-reverse;
+}
+
+.promotion-choice {
+  aspect-ratio: 1;
+  padding: 6%;
+  border: 0;
+  background: var(--surface-2);
+}
+
+.promotion-choice:hover,
+.promotion-choice:focus-visible {
+  background: var(--brass);
+}
+
+.promotion-choice .pc {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Evaluation bar -------------------------------------------------------- */
+.eval-bar {
+  position: relative;
+  flex: none;
+  width: 20px;
+  height: var(--board-size);
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--eval-black);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.25);
+}
+
+.eval-fill {
+  position: absolute;
+  inset: auto 0 0;
+  background: var(--eval-white);
+  transition: height 450ms var(--ease);
+}
+
+.eval-bar.flipped .eval-fill {
+  inset: 0 0 auto;
+}
+
+.eval-mid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - 1px);
+  height: 2px;
+  background: var(--brass);
+  opacity: 0.8;
+}
+
+.eval-num {
+  position: absolute;
+  left: 0;
+  right: 0;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.eval-num.white-side {
+  bottom: 5px;
+  color: var(--eval-black);
+}
+
+.eval-num.black-side {
+  top: 5px;
+  color: var(--eval-white);
+}
+
+.eval-bar.flipped .eval-num.white-side {
+  bottom: auto;
+  top: 5px;
+}
+
+.eval-bar.flipped .eval-num.black-side {
+  top: auto;
+  bottom: 5px;
+}
+
+/* ---- Player strips ------------------------------------------------------- */
+.player-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 34px;
+  padding: 0 2px;
+  color: var(--ink-2);
+}
+
+.stage:has(.eval-bar) .player-strip {
+  margin-left: 30px;
+}
+
+.side-dot {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+
+.side-dot.white {
+  background: #f4efe6;
+}
+
+.side-dot.black {
+  background: #26211c;
+}
+
+.player-strip.to-move .side-dot {
+  box-shadow:
+    0 0 0 1px var(--line-strong),
+    0 0 0 3px var(--brass);
+}
+
+.player-name {
+  color: var(--ink);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-elo {
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.material {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  margin-left: 0.2rem;
+}
+
+.material .pc {
+  width: 17px;
+  height: 17px;
+  margin-right: -5px;
+  opacity: 0.85;
+}
+
+.material-score {
+  margin-left: 9px;
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.player-clock,
+.clock {
+  margin-left: auto;
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-family: var(--font-book);
+  font-size: var(--step-1);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.clock.running {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.clock.low.running {
+  background: var(--bad);
+  color: #fff;
+}
+
+.thinking {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ink-3);
+  border-top-color: var(--brass);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+/* ---- Board controls -------------------------------------------------------- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  margin-top: 4px;
+}
+
+.stage:has(.eval-bar) .controls {
+  margin-left: 30px;
+}
+
+.control-group {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.control-group:first-child .btn-icon {
+  width: 44px;
+}
+
+/* ---- Board editor trays ---------------------------------------------------- */
+.palette {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: var(--board-size);
+}
+
+.palette-row {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.palette-piece {
+  width: calc(var(--board-size) / 9.5);
+  max-width: 56px;
+  aspect-ratio: 1;
+  padding: 3px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  touch-action: none;
+}
+
+.palette-piece .pc {
+  width: 100%;
+  height: 100%;
+}
+
+.palette-piece:hover {
+  background: var(--surface-3);
+}
+
+.palette-piece.on {
+  background: var(--brass-wash);
+  box-shadow: inset 0 0 0 2px var(--brass);
+}
+
+.palette-tools {
+  display: flex;
+  gap: 4px;
+}

@@ -1,0 +1,30 @@
+name: Bug report
+description: Something does not work as it should.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: position
+    attributes:
+      label: Position or game
+      description: If it concerns a position, paste its FEN or the PGN (Share → Copy FEN / Copy PGN).
+      render: text
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: e.g. Firefox 142 on Arch Linux, Safari on iPhone 15
+    validations:
+      required: true
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors
+      description: Any red messages in the browser's developer console (F12).
+      render: text
